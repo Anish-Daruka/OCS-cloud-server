@@ -11,7 +11,7 @@ S_KEY = os.getenv("S_API")
 # Initialize Supabase client
 supabase: Client = create_client(S_URL, S_KEY)
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def userlogin():
     if request.method=='POST':
         print(request)
