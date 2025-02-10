@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- ✅ Load CryptoJS here -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    
+</head>
+<body>
+    {% if not flag %}
+        <script>
+            window.onload = function() {
+                alert("Incorrect userid or password!");
+            };
+        </script>
+    {% endif %}
+
+    <h2>
+        Sign In
+    </h2>
+    <form id="loginform" method="POST" action="/login">
+    
+        <div class="mb-3">
+            <h4 style="margin: 0; text-align: center;"> <label for="username" class="form-label">Username</label></h4></div>
+          <input class="form-control" id="username" name="username" placeholder="admin_test">
+        </div></br>
+        <div class="mb-3">
+          <h4 style="margin: 0; text-align: center;"><label for="Password" class="form-label">Password</label></h4>
+          <input type="password" class="form-control" id="Password" name="password" placeholder="password">
+        </div></br>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </form>
+  
+
+      <script>
+        document.getElementById("loginform").addEventListener("submit", function(event) {
+            // Prevent default to process password hashing
+            event.preventDefault();
+            let passwordInput = document.getElementById("Password");
+            // Hash the password using MD5
+            let hashedPassword = CryptoJS.MD5(passwordInput.value).toString();
+            console.log("Hashed Password:", hashedPassword);
+            // Replace the plain-text password with its hash
+            passwordInput.value = hashedPassword;
+            // Submit the form normally
+            this.submit();
+        });
+    </script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        }
+
+    </style>
+</body>
+</html>
