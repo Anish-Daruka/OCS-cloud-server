@@ -2,9 +2,9 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 load_dotenv()
 S_URL = "https://qcjovsotomulhqjckaal.supabase.co"
 S_KEY = os.getenv("S_API")
