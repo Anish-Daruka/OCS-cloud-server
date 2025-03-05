@@ -9,6 +9,7 @@ load_dotenv()
 S_URL = "https://qcjovsotomulhqjckaal.supabase.co"
 S_KEY = os.getenv("S_API")
 # Initialize Supabase client
+print(S_KEY)
 supabase: Client = create_client(S_URL, S_KEY)
 
 @app.route('/', methods=['GET','POST'])
