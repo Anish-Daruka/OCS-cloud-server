@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from flask_cors import CORS
 from datetime import datetime
+import secrets
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +15,22 @@ S_KEY = os.getenv("S_API")
 # Initialize Supabase client
 print(S_KEY)
 supabase: Client = create_client(S_URL, S_KEY)
+
+# CSRF protection helper functions
+def generate_csrf_token():
+    """Generate a CSRF token and store it in session"""
+    if '_csrf_token' not in session:
+        session['_csrf_token'] = secrets.token_hex(32)
+    return session['_csrf_token']
+
+def validate_csrf_token(token):
+    """Validate the CSRF token"""
+    return token == session.get('_csrf_token')
+
+# Make CSRF token available to all templates
+@app.context_processor
+def inject_csrf_token():
+    return dict(csrf_token=generate_csrf_token)
 
 @app.route('/', methods=['GET','POST'])
 def userlogin():
@@ -73,14 +90,10 @@ def get_user_projects(userid):
         
         project_ids = [member['project_id'] for member in members_response.data]
         
-        # Get project details
-        projects = []
-        for project_id in project_ids:
-            project_response = supabase.table('projects').select('*').eq('id', project_id).execute()
-            if project_response.data:
-                projects.extend(project_response.data)
+        # Get project details in a single query (avoiding N+1 problem)
+        projects_response = supabase.table('projects').select('*').in_('id', project_ids).execute()
         
-        return projects
+        return projects_response.data if projects_response.data else []
     except Exception as e:
         print(f"Error getting user projects: {e}")
         return []
@@ -113,11 +126,17 @@ def accept_invitation(invitation_id):
     if not userid:
         return redirect(url_for('userlogin'))
     
+    # Validate CSRF token
+    csrf_token = request.form.get('csrf_token')
+    if not validate_csrf_token(csrf_token):
+        return jsonify({'error': 'Invalid CSRF token'}), 403
+    
     try:
         # Validate that the invitation belongs to the authenticated user
         invitation_check = supabase.table('project_members').select('*').eq('id', invitation_id).eq('user_id', userid).execute()
         if not invitation_check.data:
-            return jsonify({'error': 'Unauthorized: Invitation not found or does not belong to you'}), 403
+            # Generic error message to prevent information disclosure
+            return jsonify({'error': 'Invitation not found'}), 404
         
         # Update invitation status to accepted with timestamp
         supabase.table('project_members').update({
@@ -137,11 +156,17 @@ def decline_invitation(invitation_id):
     if not userid:
         return redirect(url_for('userlogin'))
     
+    # Validate CSRF token
+    csrf_token = request.form.get('csrf_token')
+    if not validate_csrf_token(csrf_token):
+        return jsonify({'error': 'Invalid CSRF token'}), 403
+    
     try:
         # Validate that the invitation belongs to the authenticated user
         invitation_check = supabase.table('project_members').select('*').eq('id', invitation_id).eq('user_id', userid).execute()
         if not invitation_check.data:
-            return jsonify({'error': 'Unauthorized: Invitation not found or does not belong to you'}), 403
+            # Generic error message to prevent information disclosure
+            return jsonify({'error': 'Invitation not found'}), 404
         
         # Update invitation status to declined with timestamp
         supabase.table('project_members').update({

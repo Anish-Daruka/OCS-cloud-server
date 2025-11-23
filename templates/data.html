@@ -131,9 +131,11 @@
                   <td>{{ invitation.get('projects', {}).get('description', 'No description') }}</td>
                   <td>
                     <form method="POST" action="/accept_invitation/{{ invitation['id'] }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-accept">Accept</button>
                     </form>
                     <form method="POST" action="/decline_invitation/{{ invitation['id'] }}" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-decline">Decline</button>
                     </form>
                   </td>

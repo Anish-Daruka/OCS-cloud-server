@@ -105,6 +105,8 @@ When a user is invited to a group project:
 - Ensure `SECRET_KEY` is set to a random, secure value (use `secrets.token_hex(32)` to generate one)
 - Keep Supabase API keys secure and never commit them to version control
 - The invitation endpoints include authorization checks to prevent users from accepting/declining invitations that don't belong to them
+- CSRF (Cross-Site Request Forgery) protection is implemented using session-based tokens for all state-changing operations
+- Error messages are generic to prevent information disclosure through timing or error analysis
 
 ## Troubleshooting
 
