@@ -4,7 +4,7 @@ Online Coding System (OCS) Cloud Server - A Flask-based application for managing
 
 ## Features
 
-- User authentication with password hashing (MD5)
+- User authentication with password hashing (currently MD5 client-side for legacy compatibility)
 - Role-based access control (Admin and User roles)
 - Group project management
 - Project invitation system
@@ -100,10 +100,11 @@ When a user is invited to a group project:
 
 ## Security Notes
 
-- The application uses MD5 for password hashing (client-side hashing before transmission)
-- For production use, consider using bcrypt or argon2 for server-side password hashing
-- Ensure `SECRET_KEY` is set to a random, secure value
+- **IMPORTANT**: The application currently uses MD5 for password hashing (client-side hashing before transmission). MD5 is cryptographically broken and should NOT be used for new implementations.
+- **For production use**: Replace MD5 with secure alternatives like bcrypt or argon2 for server-side password hashing
+- Ensure `SECRET_KEY` is set to a random, secure value (use `secrets.token_hex(32)` to generate one)
 - Keep Supabase API keys secure and never commit them to version control
+- The invitation endpoints include authorization checks to prevent users from accepting/declining invitations that don't belong to them
 
 ## Troubleshooting
 

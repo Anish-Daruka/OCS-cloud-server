@@ -114,8 +114,16 @@ def accept_invitation(invitation_id):
         return redirect(url_for('userlogin'))
     
     try:
-        # Update invitation status to accepted
-        supabase.table('project_members').update({'status': 'accepted'}).eq('id', invitation_id).eq('user_id', userid).execute()
+        # Validate that the invitation belongs to the authenticated user
+        invitation_check = supabase.table('project_members').select('*').eq('id', invitation_id).eq('user_id', userid).execute()
+        if not invitation_check.data:
+            return jsonify({'error': 'Unauthorized: Invitation not found or does not belong to you'}), 403
+        
+        # Update invitation status to accepted with timestamp
+        supabase.table('project_members').update({
+            'status': 'accepted',
+            'responded_at': datetime.now().isoformat()
+        }).eq('id', invitation_id).eq('user_id', userid).execute()
         return redirect(url_for('userlogin'))
     except Exception as e:
         print(f"Error accepting invitation: {e}")
@@ -130,8 +138,16 @@ def decline_invitation(invitation_id):
         return redirect(url_for('userlogin'))
     
     try:
-        # Update invitation status to declined
-        supabase.table('project_members').update({'status': 'declined'}).eq('id', invitation_id).eq('user_id', userid).execute()
+        # Validate that the invitation belongs to the authenticated user
+        invitation_check = supabase.table('project_members').select('*').eq('id', invitation_id).eq('user_id', userid).execute()
+        if not invitation_check.data:
+            return jsonify({'error': 'Unauthorized: Invitation not found or does not belong to you'}), 403
+        
+        # Update invitation status to declined with timestamp
+        supabase.table('project_members').update({
+            'status': 'declined',
+            'responded_at': datetime.now().isoformat()
+        }).eq('id', invitation_id).eq('user_id', userid).execute()
         return redirect(url_for('userlogin'))
     except Exception as e:
         print(f"Error declining invitation: {e}")
